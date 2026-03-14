@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:eqchart_flutter/eqchart_flutter.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'sample_data.dart';
@@ -20,6 +23,7 @@ class EqChartExampleApp extends StatelessWidget {
     return MaterialApp(
       title: 'EQChart Flutter',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const _ExampleScrollBehavior(),
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: scheme,
@@ -32,6 +36,20 @@ class EqChartExampleApp extends StatelessWidget {
       home: const ExampleHomePage(),
     );
   }
+}
+
+class _ExampleScrollBehavior extends MaterialScrollBehavior {
+  const _ExampleScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => <PointerDeviceKind>{
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.unknown,
+      };
 }
 
 class ExampleHomePage extends StatelessWidget {
@@ -63,6 +81,24 @@ class ExampleHomePage extends StatelessWidget {
         subtitle: 'Polygon grid, labels, multi-series',
         accent: const Color(0xFF8A79FF),
         builder: (_) => const RadarDemoPage(),
+      ),
+      _DemoEntry(
+        title: 'Bubble',
+        subtitle: 'Scatter scales and packed cluster layout',
+        accent: const Color(0xFF4A7FB1),
+        builder: (_) => const BubbleDemoPage(),
+      ),
+      _DemoEntry(
+        title: 'Heatmap',
+        subtitle: 'Sectioned treemap colored by change %',
+        accent: const Color(0xFFF4511E),
+        builder: (_) => const HeatmapDemoPage(),
+      ),
+      _DemoEntry(
+        title: 'Waveform',
+        subtitle: 'PCM min/max renderer with live append',
+        accent: const Color(0xFF62D5FF),
+        builder: (_) => const WaveformDemoPage(),
       ),
     ];
 
@@ -471,6 +507,299 @@ class _RadarDemoPageState extends State<RadarDemoPage> {
                       '${selection.datum.series.name} / ${selection.datum.axis.label}: ${selection.datum.value.toStringAsFixed(0)}';
                 });
               },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BubbleDemoPage extends StatefulWidget {
+  const BubbleDemoPage({super.key});
+
+  @override
+  State<BubbleDemoPage> createState() => _BubbleDemoPageState();
+}
+
+class _BubbleDemoPageState extends State<BubbleDemoPage> {
+  var _layoutMode = EqBubbleLayoutMode.scatter;
+  var _showGrid = true;
+  String _selection = 'Tap a bubble to inspect it.';
+
+  @override
+  Widget build(BuildContext context) {
+    final isScatter = _layoutMode == EqBubbleLayoutMode.scatter;
+    final data = isScatter
+        ? ExampleChartData.bubbleScatterData()
+        : ExampleChartData.bubblePackedData();
+
+    return _DemoScaffold(
+      title: 'Bubble',
+      controls: <Widget>[
+        SegmentedButton<EqBubbleLayoutMode>(
+          segments: const <ButtonSegment<EqBubbleLayoutMode>>[
+            ButtonSegment<EqBubbleLayoutMode>(
+              value: EqBubbleLayoutMode.scatter,
+              label: Text('Scatter'),
+            ),
+            ButtonSegment<EqBubbleLayoutMode>(
+              value: EqBubbleLayoutMode.packed,
+              label: Text('Packed'),
+            ),
+          ],
+          selected: <EqBubbleLayoutMode>{_layoutMode},
+          onSelectionChanged: (value) {
+            setState(() => _layoutMode = value.first);
+          },
+        ),
+        SwitchListTile.adaptive(
+          value: _showGrid,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show scatter grid'),
+          onChanged:
+              isScatter ? (value) => setState(() => _showGrid = value) : null,
+        ),
+      ],
+      footerText: _selection,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'Sector cluster',
+          subtitle:
+              'Packed mode matches the Android bubble sample; scatter exposes scale mapping.',
+          child: SizedBox(
+            height: 380,
+            child: EqBubbleChart(
+              data: data,
+              behavior: EqBubbleChartBehavior(
+                layoutMode: _layoutMode,
+                showGrid: isScatter && _showGrid,
+                showAxes: isScatter,
+                showTicks: isScatter,
+              ),
+              onItemTap: (selection) {
+                setState(() {
+                  _selection =
+                      '${selection.datum.label}: ${formatBubbleNumberCompact(selection.datum.size)}';
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class HeatmapDemoPage extends StatefulWidget {
+  const HeatmapDemoPage({super.key});
+
+  @override
+  State<HeatmapDemoPage> createState() => _HeatmapDemoPageState();
+}
+
+class _HeatmapDemoPageState extends State<HeatmapDemoPage> {
+  var _showHeaders = true;
+  String _selection = 'Tap a block to inspect it.';
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Heatmap',
+      controls: <Widget>[
+        SwitchListTile.adaptive(
+          value: _showHeaders,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show section headers'),
+          onChanged: (value) => setState(() => _showHeaders = value),
+        ),
+      ],
+      footerText: _selection,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'US large caps',
+          subtitle:
+              'Treemap block area follows size ratio and block color reflects percentage change.',
+          child: SizedBox(
+            height: 560,
+            child: EqStockHeatmapChart(
+              sections: ExampleChartData.heatmapSections(),
+              behavior: EqStockHeatmapChartBehavior(
+                showSectionHeaders: _showHeaders,
+              ),
+              onItemTap: (selection) {
+                setState(() {
+                  _selection =
+                      '${selection.datum.symbol} ${formatStockHeatmapChange(selection.datum.changePct)} / ${formatStockHeatmapMarketCap(selection.datum.marketCap)}';
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class WaveformDemoPage extends StatefulWidget {
+  const WaveformDemoPage({super.key});
+
+  @override
+  State<WaveformDemoPage> createState() => _WaveformDemoPageState();
+}
+
+class _WaveformDemoPageState extends State<WaveformDemoPage> {
+  static const int _sampleRateHz = 44100;
+  static const int _chunkSize = 2205;
+
+  late final EqPcmWaveformController _controller;
+  late final List<int> _loopSamples;
+  Timer? _timer;
+  var _showCenterLine = true;
+  var _amplitudeScale = 1.0;
+  var _streaming = false;
+  var _cursor = 0;
+  String _status = 'Static 1.6s sample loaded.';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = EqPcmWaveformController(
+      sampleRateHz: _sampleRateHz,
+      windowDurationMs: 2000,
+    );
+    _loopSamples = ExampleChartData.waveformSamples(
+      sampleRateHz: _sampleRateHz,
+      durationMs: 1600,
+      frequencyHz: 220,
+    );
+    _controller.setPcm16Mono(_loopSamples);
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleStreaming() {
+    if (_streaming) {
+      _timer?.cancel();
+      setState(() {
+        _streaming = false;
+        _status = 'Streaming paused.';
+      });
+      return;
+    }
+
+    _timer = Timer.periodic(const Duration(milliseconds: 50), (_) {
+      _controller.appendPcm16Mono(_nextWaveChunk());
+    });
+    setState(() {
+      _streaming = true;
+      _status = 'Appending live 16-bit PCM chunks.';
+    });
+  }
+
+  List<int> _nextWaveChunk() {
+    if (_loopSamples.isEmpty) {
+      return const <int>[];
+    }
+
+    final out = List<int>.generate(
+      _chunkSize,
+      (index) => _loopSamples[(_cursor + index) % _loopSamples.length],
+      growable: false,
+    );
+    _cursor = (_cursor + _chunkSize) % _loopSamples.length;
+    return out;
+  }
+
+  void _reloadStatic() {
+    _timer?.cancel();
+    _cursor = 0;
+    _controller.setPcm16Mono(_loopSamples);
+    setState(() {
+      _streaming = false;
+      _status = 'Static 1.6s sample reloaded.';
+    });
+  }
+
+  void _clearBuffer() {
+    _timer?.cancel();
+    _controller.clear();
+    setState(() {
+      _streaming = false;
+      _status = 'Waveform buffer cleared.';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Waveform',
+      controls: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: FilledButton(
+                onPressed: _toggleStreaming,
+                child: Text(_streaming ? 'Stop stream' : 'Start stream'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _reloadStatic,
+                child: const Text('Reload sample'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: _clearBuffer,
+          child: const Text('Clear buffer'),
+        ),
+        SwitchListTile.adaptive(
+          value: _showCenterLine,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show center line'),
+          onChanged: (value) => setState(() => _showCenterLine = value),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Amplitude ${_amplitudeScale.toStringAsFixed(1)}x',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Slider(
+              value: _amplitudeScale,
+              min: 0.4,
+              max: 2.2,
+              divisions: 9,
+              label: _amplitudeScale.toStringAsFixed(1),
+              onChanged: (value) => setState(() => _amplitudeScale = value),
+            ),
+          ],
+        ),
+      ],
+      footerText: _status,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'PCM waveform',
+          subtitle:
+              'Min/max downsampling per pixel keeps short peaks visible during streaming.',
+          child: SizedBox(
+            height: 240,
+            child: EqPcmWaveformChart(
+              controller: _controller,
+              style: EqPcmWaveformStyle(
+                showCenterLine: _showCenterLine,
+                amplitudeScale: _amplitudeScale,
+              ),
             ),
           ),
         ),

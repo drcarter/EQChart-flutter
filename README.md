@@ -10,6 +10,9 @@ Implemented chart widgets:
 - `EqLineChart`
 - `EqAreaChart`
 - `EqRadarChart`
+- `EqBubbleChart`
+- `EqStockHeatmapChart`
+- `EqPcmWaveformChart`
 
 The package does not depend on a third-party chart library. All chart rendering is implemented with `CustomPainter`.
 
@@ -76,6 +79,47 @@ Main types:
 - `EqRadarChartStyle`
 - `EqRadarChartBehavior`
 
+### Bubble
+
+- scatter and packed layout modes
+- bubble radius mapping from `size`
+- axes, grid, ticks, and auto legend in scatter mode
+- tap selection per bubble
+
+Main types:
+
+- `BubbleDatum`
+- `EqBubbleScaleOverride`
+- `EqBubbleChartStyle`
+- `EqBubbleChartBehavior`
+- `EqBubbleLayoutMode`
+
+### Stock Heatmap
+
+- section-based treemap layout
+- block color mapping from percentage change
+- area sizing from `sizeRatio` or `marketCap`
+- tap selection per block
+
+Main types:
+
+- `StockHeatmapItem`
+- `StockHeatmapSection`
+- `EqStockHeatmapChartStyle`
+- `EqStockHeatmapChartBehavior`
+
+### PCM Waveform
+
+- PCM 16-bit mono waveform rendering
+- min/max downsampling per pixel
+- fixed-duration ring buffer controller
+- static sample and live append support
+
+Main types:
+
+- `EqPcmWaveformController`
+- `EqPcmWaveformStyle`
+
 ## Project Structure
 
 - `lib/`: reusable chart package
@@ -100,12 +144,14 @@ import 'package:eqchart_flutter/eqchart_flutter.dart';
 
 ## Common API Pattern
 
-Every chart follows the same top-level structure:
+Most charts follow the same top-level structure:
 
 - `data`: slices, series, or axes
 - `style`: colors, text styles, spacing, line widths
 - `behavior`: legend, labels, animation, formatting, interaction
 - `onItemTap`: chart-specific selection callback
+
+`EqPcmWaveformChart` uses `controller + style` instead of `data + behavior`.
 
 Selection callbacks use:
 
@@ -113,6 +159,8 @@ Selection callbacks use:
 - `EqChartSelection<BarDatum>`
 - `EqChartSelection<LineDatum>`
 - `EqChartSelection<RadarPointDatum>`
+- `EqChartSelection<BubbleDatum>`
+- `EqChartSelection<StockHeatmapItem>`
 
 ## Usage
 
@@ -268,6 +316,78 @@ SizedBox(
 )
 ```
 
+### Bubble Chart
+
+```dart
+SizedBox(
+  height: 360,
+  child: EqBubbleChart(
+    data: const <BubbleDatum>[
+      BubbleDatum(
+        x: 18,
+        y: 82,
+        size: 129087,
+        color: Color(0xFF4A7FB1),
+        label: 'Food',
+        legendGroup: 'Arts',
+      ),
+      BubbleDatum(
+        x: 34,
+        y: 63,
+        size: 113576,
+        color: Color(0xFFFF9100),
+        label: 'Retail',
+        legendGroup: 'Goods',
+      ),
+    ],
+    behavior: const EqBubbleChartBehavior(
+      layoutMode: EqBubbleLayoutMode.scatter,
+    ),
+  ),
+)
+```
+
+### Stock Heatmap Chart
+
+```dart
+SizedBox(
+  height: 480,
+  child: EqStockHeatmapChart(
+    sections: const <StockHeatmapSection>[
+      StockHeatmapSection(
+        name: 'Technology',
+        color: Color(0xFF1E88E5),
+        stocks: <StockHeatmapItem>[
+          StockHeatmapItem(
+            symbol: 'AAPL',
+            name: 'Apple Inc.',
+            sector: 'Technology',
+            price: 200,
+            changePct: 1.2,
+            marketCap: 3000000000000,
+            sizeRatio: 24,
+          ),
+        ],
+      ),
+    ],
+  ),
+)
+```
+
+### PCM Waveform Chart
+
+```dart
+final controller = EqPcmWaveformController();
+controller.setPcm16Mono(<int>[0, 1200, -600, 300, -150]);
+
+SizedBox(
+  height: 220,
+  child: EqPcmWaveformChart(
+    controller: controller,
+  ),
+)
+```
+
 ## Example App
 
 Run the mobile example:
@@ -297,9 +417,10 @@ The example app currently includes:
 - `Bar`: grouped / stacked mode, negative baseline
 - `Line + Area`: multi-series trend rendering and area fill
 - `Radar`: polygon grid, axis labels, multi-series comparison
+- `Bubble`: scatter and packed layouts
+- `Heatmap`: sectioned stock treemap
+- `Waveform`: static sample and live append controller demo
 
 ## Notes
 
-- The package currently focuses on `pie`, `donut`, `bar`, `line`, `area`, and `radar`.
-- `bubble`, `heatmap`, and `waveform` are not implemented yet in the Flutter package.
 - Tests cover chart layout helpers and widget smoke rendering in [`test/eqchart_flutter_test.dart`](/Users/daniel/dev_source/private/EQChart-flutter/test/eqchart_flutter_test.dart).
