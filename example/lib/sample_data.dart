@@ -535,6 +535,29 @@ class ExampleChartData {
     ];
   }
 
+  static List<GaugeRange> gaugeRanges() {
+    return const <GaugeRange>[
+      GaugeRange(
+        startValue: 0,
+        endValue: 55,
+        color: Color(0xFF13C3A3),
+        label: 'Healthy',
+      ),
+      GaugeRange(
+        startValue: 55,
+        endValue: 80,
+        color: Color(0xFFFFB703),
+        label: 'Warning',
+      ),
+      GaugeRange(
+        startValue: 80,
+        endValue: 100,
+        color: Color(0xFFEF476F),
+        label: 'Critical',
+      ),
+    ];
+  }
+
   static List<int> waveformSamples({
     int sampleRateHz = 44100,
     int durationMs = 1600,

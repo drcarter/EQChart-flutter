@@ -2,6 +2,7 @@ library eqchart_flutter;
 
 export 'src/charts/bar/bar_chart.dart';
 export 'src/charts/bubble/bubble_chart.dart';
+export 'src/charts/gauge/gauge_chart.dart';
 export 'src/charts/heatmap/stock_heatmap_chart.dart';
 export 'src/charts/line/line_chart.dart';
 export 'src/charts/pie/pie_chart.dart';

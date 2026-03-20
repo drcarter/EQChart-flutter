@@ -95,6 +95,12 @@ class ExampleHomePage extends StatelessWidget {
         builder: (_) => const HeatmapDemoPage(),
       ),
       _DemoEntry(
+        title: 'Gauge',
+        subtitle: 'Threshold ranges, ticks, animated needle',
+        accent: const Color(0xFFFFB703),
+        builder: (_) => const GaugeDemoPage(),
+      ),
+      _DemoEntry(
         title: 'Waveform',
         subtitle: 'PCM min/max renderer with live append',
         accent: const Color(0xFF62D5FF),
@@ -799,6 +805,92 @@ class _WaveformDemoPageState extends State<WaveformDemoPage> {
               style: EqPcmWaveformStyle(
                 showCenterLine: _showCenterLine,
                 amplitudeScale: _amplitudeScale,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class GaugeDemoPage extends StatefulWidget {
+  const GaugeDemoPage({super.key});
+
+  @override
+  State<GaugeDemoPage> createState() => _GaugeDemoPageState();
+}
+
+class _GaugeDemoPageState extends State<GaugeDemoPage> {
+  var _currentValue = 72.0;
+  var _showTicks = true;
+  var _showMinMaxLabels = true;
+
+  String get _zoneLabel {
+    if (_currentValue >= 80) {
+      return 'Critical zone';
+    }
+    if (_currentValue >= 55) {
+      return 'Warning zone';
+    }
+    return 'Healthy zone';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Gauge',
+      controls: <Widget>[
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Current load ${_currentValue.toStringAsFixed(0)}%',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            Slider(
+              value: _currentValue,
+              min: 0,
+              max: 100,
+              divisions: 20,
+              label: _currentValue.toStringAsFixed(0),
+              onChanged: (value) => setState(() => _currentValue = value),
+            ),
+          ],
+        ),
+        SwitchListTile.adaptive(
+          value: _showTicks,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show ticks'),
+          onChanged: (value) => setState(() => _showTicks = value),
+        ),
+        SwitchListTile.adaptive(
+          value: _showMinMaxLabels,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show min / max labels'),
+          onChanged: (value) => setState(() => _showMinMaxLabels = value),
+        ),
+      ],
+      footerText: '$_zoneLabel at ${_currentValue.toStringAsFixed(0)}%',
+      children: <Widget>[
+        _ChartPanel(
+          title: 'Server load',
+          subtitle:
+              'Semi-circular gauge ported from EQChart with threshold bands and animated value changes.',
+          child: SizedBox(
+            height: 320,
+            child: EqGaugeChart(
+              value: GaugeValue(
+                value: _currentValue,
+                minValue: 0,
+                maxValue: 100,
+                label: 'CPU Load',
+              ),
+              ranges: ExampleChartData.gaugeRanges(),
+              behavior: EqGaugeChartBehavior(
+                showTicks: _showTicks,
+                showMinMaxLabels: _showMinMaxLabels,
+                valueFormatter: (value) => '${value.toStringAsFixed(0)}%',
               ),
             ),
           ),

@@ -189,6 +189,22 @@ void main() {
     expect(controller.snapshot().last, 2001);
   });
 
+  test('gauge value resolution clamps into the current domain', () {
+    final resolved = resolveGaugeValue(
+      const GaugeValue(
+        value: 132,
+        minValue: 0,
+        maxValue: 100,
+        label: 'Load',
+      ),
+    );
+
+    expect(resolved, isNotNull);
+    expect(resolved!.clampedValue, 100);
+    expect(resolved.progress, 1);
+    expect(resolved.label, 'Load');
+  });
+
   testWidgets('public charts render inside a material app', (tester) async {
     final waveformController = EqPcmWaveformController();
     waveformController.setPcm16Mono(const <int>[0, 1200, -600, 300, -150]);
@@ -238,6 +254,34 @@ void main() {
                 ),
                 const SizedBox(
                   height: 220,
+                  child: EqGaugeChart(
+                    value: GaugeValue(
+                      value: 72,
+                      minValue: 0,
+                      maxValue: 100,
+                      label: 'CPU',
+                    ),
+                    ranges: <GaugeRange>[
+                      GaugeRange(
+                        startValue: 0,
+                        endValue: 70,
+                        color: Colors.green,
+                      ),
+                      GaugeRange(
+                        startValue: 70,
+                        endValue: 90,
+                        color: Colors.orange,
+                      ),
+                      GaugeRange(
+                        startValue: 90,
+                        endValue: 100,
+                        color: Colors.red,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 220,
                   child: EqStockHeatmapChart(
                     sections: <StockHeatmapSection>[
                       StockHeatmapSection(
@@ -276,6 +320,7 @@ void main() {
     expect(find.byType(EqPieChart), findsOneWidget);
     expect(find.byType(EqBarChart), findsOneWidget);
     expect(find.byType(EqBubbleChart), findsOneWidget);
+    expect(find.byType(EqGaugeChart), findsOneWidget);
     expect(find.byType(EqStockHeatmapChart), findsOneWidget);
     expect(find.byType(EqPcmWaveformChart), findsOneWidget);
   });
