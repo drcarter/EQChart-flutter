@@ -109,6 +109,67 @@ void main() {
         layout.bubbles.first.radius, greaterThan(layout.bubbles.last.radius));
   });
 
+  test('box plot layout resolves quartiles and outlier bounds', () {
+    final layout = computeBoxPlotChartLayout(
+      const Size(360, 280),
+      const <BoxPlotEntry>[
+        BoxPlotEntry(
+          label: 'API',
+          min: 10,
+          q1: 20,
+          median: 30,
+          q3: 40,
+          max: 50,
+          outliers: <double>[56],
+        ),
+      ],
+      const EqBoxPlotChartStyle(),
+      const EqBoxPlotChartBehavior(),
+    );
+
+    expect(layout.entries, hasLength(1));
+    expect(layout.yTicks, hasLength(6));
+    expect(layout.maxValue, 56);
+    expect(layout.entries.single.outlierOffsets, hasLength(1));
+  });
+
+  test('histogram layout keeps baseline in range and resolves bars', () {
+    final layout = computeHistogramChartLayout(
+      const Size(360, 280),
+      const <HistogramBin>[
+        HistogramBin(start: 0, end: 10, value: 4),
+        HistogramBin(start: 10, end: 20, value: -2),
+      ],
+      const EqHistogramChartStyle(),
+      const EqHistogramChartBehavior(),
+    );
+
+    expect(layout.bars, hasLength(2));
+    expect(layout.yTicks, hasLength(6));
+    expect(
+      layout.baselineValue,
+      inInclusiveRange(layout.minValue, layout.maxValue),
+    );
+  });
+
+  test('range bar layout resolves horizontal intervals and tick labels', () {
+    final layout = computeRangeBarChartLayout(
+      const Size(360, 280),
+      const <RangeBarEntry>[
+        RangeBarEntry(label: 'Discovery', start: 0, end: 2),
+        RangeBarEntry(label: 'Design', start: 4, end: 1),
+      ],
+      const EqRangeBarChartStyle(),
+      const EqRangeBarChartBehavior(),
+    );
+
+    expect(layout.bars, hasLength(2));
+    expect(layout.ticks, hasLength(6));
+    expect(layout.bars.first.rect.left, lessThan(layout.bars.first.rect.right));
+    expect(layout.bars.last.entry.startValue, 1);
+    expect(layout.bars.last.entry.endValue, 4);
+  });
+
   test('heatmap layout creates blocks and section headers', () {
     final layout = computeStockHeatmapLayout(
       const Size(360, 420),
@@ -240,6 +301,21 @@ void main() {
                 ),
                 const SizedBox(
                   height: 220,
+                  child: EqBoxPlotChart(
+                    entries: <BoxPlotEntry>[
+                      BoxPlotEntry(
+                        label: 'API',
+                        min: 10,
+                        q1: 20,
+                        median: 30,
+                        q3: 40,
+                        max: 50,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 220,
                   child: EqBubbleChart(
                     data: <BubbleDatum>[
                       BubbleDatum(
@@ -249,6 +325,24 @@ void main() {
                         color: Colors.orange,
                         label: 'A',
                       ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 220,
+                  child: EqHistogramChart(
+                    bins: <HistogramBin>[
+                      HistogramBin(start: 0, end: 10, value: 4),
+                      HistogramBin(start: 10, end: 20, value: 8),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 220,
+                  child: EqRangeBarChart(
+                    entries: <RangeBarEntry>[
+                      RangeBarEntry(label: 'Discovery', start: 0, end: 2),
+                      RangeBarEntry(label: 'Design', start: 1, end: 4),
                     ],
                   ),
                 ),
@@ -319,7 +413,10 @@ void main() {
 
     expect(find.byType(EqPieChart), findsOneWidget);
     expect(find.byType(EqBarChart), findsOneWidget);
+    expect(find.byType(EqBoxPlotChart), findsOneWidget);
     expect(find.byType(EqBubbleChart), findsOneWidget);
+    expect(find.byType(EqHistogramChart), findsOneWidget);
+    expect(find.byType(EqRangeBarChart), findsOneWidget);
     expect(find.byType(EqGaugeChart), findsOneWidget);
     expect(find.byType(EqStockHeatmapChart), findsOneWidget);
     expect(find.byType(EqPcmWaveformChart), findsOneWidget);

@@ -7,10 +7,13 @@ Implemented chart widgets:
 - `EqPieChart`
 - `EqDonutChart`
 - `EqBarChart`
+- `EqBoxPlotChart`
 - `EqLineChart`
 - `EqAreaChart`
 - `EqRadarChart`
 - `EqBubbleChart`
+- `EqHistogramChart`
+- `EqRangeBarChart`
 - `EqStockHeatmapChart`
 - `EqPcmWaveformChart`
 
@@ -94,6 +97,42 @@ Main types:
 - `EqBubbleChartBehavior`
 - `EqBubbleLayoutMode`
 
+### Box Plot
+
+- category-based min / quartile / median / max rendering
+- outlier point rendering and per-box selection
+- axis and value label formatting callbacks
+
+Main types:
+
+- `BoxPlotEntry`
+- `EqBoxPlotChartStyle`
+- `EqBoxPlotChartBehavior`
+
+### Histogram
+
+- ordered numeric bins with configurable bin labels
+- zero-aware baseline and negative value support
+- value labels and per-bin selection
+
+Main types:
+
+- `HistogramBin`
+- `EqHistogramChartStyle`
+- `EqHistogramChartBehavior`
+
+### Range Bar
+
+- horizontal interval bars on a shared numeric axis
+- row labels, x-axis tick formatting, and compact timeline labeling
+- start-to-end animation and per-row selection
+
+Main types:
+
+- `RangeBarEntry`
+- `EqRangeBarChartStyle`
+- `EqRangeBarChartBehavior`
+
 ### Stock Heatmap
 
 - section-based treemap layout
@@ -157,9 +196,11 @@ Selection callbacks use:
 
 - `EqChartSelection<PieSlice>`
 - `EqChartSelection<BarDatum>`
+- `EqChartSelection<BoxPlotEntry>`
 - `EqChartSelection<LineDatum>`
 - `EqChartSelection<RadarPointDatum>`
 - `EqChartSelection<BubbleDatum>`
+- `EqChartSelection<HistogramBin>`
 - `EqChartSelection<StockHeatmapItem>`
 
 ## Usage
