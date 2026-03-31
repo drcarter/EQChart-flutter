@@ -95,6 +95,24 @@ class ExampleHomePage extends StatelessWidget {
         builder: (_) => const HeatmapDemoPage(),
       ),
       _DemoEntry(
+        title: 'Box Plot',
+        subtitle: 'Quartiles, whiskers, outliers, median labels',
+        accent: const Color(0xFF2563EB),
+        builder: (_) => const BoxPlotDemoPage(),
+      ),
+      _DemoEntry(
+        title: 'Histogram',
+        subtitle: 'Bucket ranges, baseline, animated bars',
+        accent: const Color(0xFF14B8A6),
+        builder: (_) => const HistogramDemoPage(),
+      ),
+      _DemoEntry(
+        title: 'Range Bar',
+        subtitle: 'Timeline intervals on a shared axis',
+        accent: const Color(0xFF0F766E),
+        builder: (_) => const RangeBarDemoPage(),
+      ),
+      _DemoEntry(
         title: 'Gauge',
         subtitle: 'Threshold ranges, ticks, animated needle',
         accent: const Color(0xFFFFB703),
@@ -637,6 +655,189 @@ class _HeatmapDemoPageState extends State<HeatmapDemoPage> {
                 setState(() {
                   _selection =
                       '${selection.datum.symbol} ${formatStockHeatmapChange(selection.datum.changePct)} / ${formatStockHeatmapMarketCap(selection.datum.marketCap)}';
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class BoxPlotDemoPage extends StatefulWidget {
+  const BoxPlotDemoPage({super.key});
+
+  @override
+  State<BoxPlotDemoPage> createState() => _BoxPlotDemoPageState();
+}
+
+class _BoxPlotDemoPageState extends State<BoxPlotDemoPage> {
+  var _showGrid = true;
+  var _showValueLabels = true;
+  String _selection = 'Tap a box to inspect it.';
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Box Plot',
+      controls: <Widget>[
+        SwitchListTile.adaptive(
+          value: _showGrid,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show grid'),
+          onChanged: (value) => setState(() => _showGrid = value),
+        ),
+        SwitchListTile.adaptive(
+          value: _showValueLabels,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show median labels'),
+          onChanged: (value) => setState(() => _showValueLabels = value),
+        ),
+      ],
+      footerText: _selection,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'Service latency spread',
+          subtitle:
+              'Quartile boxes and whiskers mirror the EQChart sample for category-by-category response time ranges.',
+          child: SizedBox(
+            height: 360,
+            child: EqBoxPlotChart(
+              entries: ExampleChartData.boxPlotEntries(),
+              behavior: EqBoxPlotChartBehavior(
+                showGrid: _showGrid,
+                showValueLabels: _showValueLabels,
+                yLabelFormatter: (value) =>
+                    '${formatBoxPlotAxisValue(value)}ms',
+              ),
+              onItemTap: (selection) {
+                setState(() {
+                  _selection =
+                      '${selection.datum.label}: median ${selection.datum.median.toStringAsFixed(0)}ms';
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class HistogramDemoPage extends StatefulWidget {
+  const HistogramDemoPage({super.key});
+
+  @override
+  State<HistogramDemoPage> createState() => _HistogramDemoPageState();
+}
+
+class _HistogramDemoPageState extends State<HistogramDemoPage> {
+  var _showGrid = true;
+  var _showLabels = true;
+  String _selection = 'Tap a histogram bar to inspect it.';
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Histogram',
+      controls: <Widget>[
+        SwitchListTile.adaptive(
+          value: _showGrid,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show grid'),
+          onChanged: (value) => setState(() => _showGrid = value),
+        ),
+        SwitchListTile.adaptive(
+          value: _showLabels,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show value labels'),
+          onChanged: (value) => setState(() => _showLabels = value),
+        ),
+      ],
+      footerText: _selection,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'Response time distribution',
+          subtitle:
+              'Ordered bins share the Android sample ranges and render compact bucket labels on the X axis.',
+          child: SizedBox(
+            height: 340,
+            child: EqHistogramChart(
+              bins: ExampleChartData.histogramBins(),
+              behavior: EqHistogramChartBehavior(
+                showGrid: _showGrid,
+                showBarLabels: _showLabels,
+                valueLabelFormatter: (value) => value.toStringAsFixed(0),
+                yLabelFormatter: (value) => value.toStringAsFixed(0),
+              ),
+              onItemTap: (selection) {
+                setState(() {
+                  _selection =
+                      '${formatHistogramBoundary(selection.datum.start)}-${formatHistogramBoundary(selection.datum.end)}ms: ${selection.datum.value.toStringAsFixed(0)}';
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class RangeBarDemoPage extends StatefulWidget {
+  const RangeBarDemoPage({super.key});
+
+  @override
+  State<RangeBarDemoPage> createState() => _RangeBarDemoPageState();
+}
+
+class _RangeBarDemoPageState extends State<RangeBarDemoPage> {
+  var _showGrid = true;
+  var _showLabels = true;
+  String _selection = 'Tap a timeline bar to inspect it.';
+
+  @override
+  Widget build(BuildContext context) {
+    return _DemoScaffold(
+      title: 'Range Bar',
+      controls: <Widget>[
+        SwitchListTile.adaptive(
+          value: _showGrid,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show grid'),
+          onChanged: (value) => setState(() => _showGrid = value),
+        ),
+        SwitchListTile.adaptive(
+          value: _showLabels,
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Show interval labels'),
+          onChanged: (value) => setState(() => _showLabels = value),
+        ),
+      ],
+      footerText: _selection,
+      children: <Widget>[
+        _ChartPanel(
+          title: 'Delivery timeline',
+          subtitle:
+              'Horizontal start/end intervals mirror the Android EQChart roadmap sample.',
+          child: SizedBox(
+            height: 360,
+            child: EqRangeBarChart(
+              entries: ExampleChartData.rangeBarEntries(),
+              behavior: EqRangeBarChartBehavior(
+                showGrid: _showGrid,
+                showBarLabels: _showLabels,
+                xLabelFormatter: (value) => 'W${value.toInt() + 1}',
+                barLabelFormatter: (entry) =>
+                    'W${entry.startValue.toInt() + 1} - W${entry.endValue.toInt() + 1}',
+              ),
+              onItemTap: (selection) {
+                final duration =
+                    (selection.datum.end - selection.datum.start).abs();
+                setState(() {
+                  _selection =
+                      '${selection.datum.payload ?? selection.datum.label}: ${duration.toStringAsFixed(0)}w';
                 });
               },
             ),

@@ -12,13 +12,21 @@ void main() {
     expect(find.text('Bar'), findsOneWidget);
     expect(find.text('Line + Area'), findsOneWidget);
     await tester.scrollUntilVisible(
+      find.text('Box Plot'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Box Plot'), findsOneWidget);
+    await tester.scrollUntilVisible(
       find.text('Gauge'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Radar'), findsOneWidget);
+    expect(find.text('Histogram'), findsOneWidget);
     expect(find.text('Gauge'), findsOneWidget);
   });
 }

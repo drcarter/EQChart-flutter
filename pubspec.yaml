@@ -1,5 +1,5 @@
 name: eqchart_flutter
-description: "EQChart for Flutter with painter-based pie, bar, line, radar, bubble, heatmap, and waveform charts."
+description: "EQChart for Flutter with painter-based pie, bar, box plot, line, radar, bubble, histogram, heatmap, gauge, and waveform charts."
 version: 0.0.1
 homepage:
 

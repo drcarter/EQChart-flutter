@@ -275,6 +275,109 @@ class ExampleChartData {
     ];
   }
 
+  static List<BoxPlotEntry> boxPlotEntries() {
+    return const <BoxPlotEntry>[
+      BoxPlotEntry(
+        label: 'API',
+        min: 92,
+        q1: 118,
+        median: 142,
+        q3: 181,
+        max: 226,
+        outliers: <double>[248],
+        color: Color(0xFF2563EB),
+        title: 'Median 142ms',
+        payload: 'API',
+      ),
+      BoxPlotEntry(
+        label: 'Worker',
+        min: 74,
+        q1: 96,
+        median: 126,
+        q3: 164,
+        max: 209,
+        outliers: <double>[58, 228],
+        color: Color(0xFF14B8A6),
+        title: 'Median 126ms',
+        payload: 'Worker',
+      ),
+      BoxPlotEntry(
+        label: 'Cache',
+        min: 38,
+        q1: 51,
+        median: 63,
+        q3: 79,
+        max: 101,
+        outliers: <double>[112],
+        color: Color(0xFF7C3AED),
+        title: 'Median 63ms',
+        payload: 'Cache',
+      ),
+      BoxPlotEntry(
+        label: 'Search',
+        min: 112,
+        q1: 148,
+        median: 188,
+        q3: 236,
+        max: 294,
+        outliers: <double>[324],
+        color: Color(0xFFF59E0B),
+        title: 'Median 188ms',
+        payload: 'Search',
+      ),
+    ];
+  }
+
+  static List<HistogramBin> histogramBins() {
+    return const <HistogramBin>[
+      HistogramBin(start: 0, end: 10, value: 4, payload: '0-10'),
+      HistogramBin(start: 10, end: 20, value: 9, payload: '10-20'),
+      HistogramBin(start: 20, end: 30, value: 13, payload: '20-30'),
+      HistogramBin(start: 30, end: 40, value: 8, payload: '30-40'),
+      HistogramBin(start: 40, end: 50, value: 3, payload: '40-50'),
+    ];
+  }
+
+  static List<RangeBarEntry> rangeBarEntries() {
+    return const <RangeBarEntry>[
+      RangeBarEntry(
+        label: 'Discovery',
+        start: 0,
+        end: 2,
+        color: Color(0xFF2563EB),
+        payload: 'Discovery',
+      ),
+      RangeBarEntry(
+        label: 'Design',
+        start: 1,
+        end: 4,
+        color: Color(0xFF14B8A6),
+        payload: 'Design',
+      ),
+      RangeBarEntry(
+        label: 'Platform',
+        start: 3,
+        end: 7,
+        color: Color(0xFF7C3AED),
+        payload: 'Platform',
+      ),
+      RangeBarEntry(
+        label: 'QA',
+        start: 6,
+        end: 8,
+        color: Color(0xFFF59E0B),
+        payload: 'QA',
+      ),
+      RangeBarEntry(
+        label: 'Launch',
+        start: 8,
+        end: 9,
+        color: Color(0xFFEF4444),
+        payload: 'Launch',
+      ),
+    ];
+  }
+
   static List<StockHeatmapSection> heatmapSections() {
     return const <StockHeatmapSection>[
       StockHeatmapSection(
